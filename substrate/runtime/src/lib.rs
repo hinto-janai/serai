@@ -199,7 +199,7 @@ impl system::Config for Runtime {
   type BaseCallFilter = CallFilter;
   type BlockWeights = BlockWeights;
   type BlockLength = BlockLength;
-  type AccountId = PublicKey;
+  type AccountId = serai_primitives::AccountId;
   type RuntimeCall = RuntimeCall;
   type Lookup = AccountLookup;
   type Hash = Hash;

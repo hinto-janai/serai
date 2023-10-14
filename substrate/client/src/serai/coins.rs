@@ -1,11 +1,11 @@
 use sp_core::sr25519::Public;
+use serai_primitives::{SeraiAddress, SubstrateAmount, Amount, Coin, Balance};
+pub use serai_tokens_primitives as primitives;
+use primitives::OutInstruction;
 use serai_runtime::{
-  primitives::{SeraiAddress, SubstrateAmount, Amount, Coin, Balance},
   assets::{AssetDetails, AssetAccount},
   tokens, Tokens, Runtime,
 };
-pub use tokens::primitives;
-use primitives::OutInstruction;
 
 use subxt::tx::Payload;
 

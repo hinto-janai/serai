@@ -1,6 +1,6 @@
-use serai_runtime::{in_instructions, InInstructions, Runtime};
-pub use in_instructions::primitives;
+pub use serai_in_instructions_primitives as primitives;
 use primitives::SignedBatch;
+use serai_runtime::{in_instructions, InInstructions, Runtime};
 
 use subxt::utils::Encoded;
 

@@ -14,6 +14,7 @@ use sp_core::{Pair as PairTrait, sr25519::Pair};
 use sp_runtime::traits::{LookupError, Lookup, StaticLookup};
 
 pub type PublicKey = Public;
+pub type AccountId = Public;
 
 #[derive(
   Clone,

@@ -1,8 +1,9 @@
 use sp_core::sr25519::{Public, Signature};
 
-use serai_runtime::{primitives::Amount, validator_sets, ValidatorSets, Runtime};
-pub use validator_sets::primitives;
+use serai_primitives::Amount;
+pub use serai_validator_sets_primitives as primitives;
 use primitives::{Session, ValidatorSet, KeyPair};
+use serai_runtime::{validator_sets, ValidatorSets, Runtime};
 
 use subxt::utils::Encoded;
 

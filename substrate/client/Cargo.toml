@@ -21,7 +21,11 @@ futures = "0.3"
 scale = { package = "parity-scale-codec", version = "3" }
 scale-info = { version = "2", optional = true }
 
-serai-runtime = { path = "../runtime", version = "0.1" }
+serai-primitives = { path = "../primitives", features = ["std"] }
+serai-tokens-primitives = { path = "../tokens/primitives", features = ["std"] }
+serai-validator-sets-primitives = { path = "../validator-sets/primitives", features = ["std"] }
+serai-in-instructions-primitives = { path = "../in-instructions/primitives", features = ["std"] }
+serai-runtime = { path = "../runtime", features = ["std"] }
 
 sp-core = { git = "https://github.com/serai-dex/substrate" }
 subxt = { version = "0.29", default-features = false, features = ["jsonrpsee-ws"], optional = true }

@@ -25,13 +25,10 @@ use subxt::{
   Config as SubxtConfig, OnlineClient,
 };
 
-pub use serai_runtime::primitives;
+pub use serai_primitives as primitives;
 pub use primitives::{SeraiAddress, Signature, Amount};
 
-pub use serai_runtime as runtime;
-use serai_runtime::{
-  system::Config, support::traits::PalletInfo as PalletInfoTrait, PalletInfo, Runtime,
-};
+use serai_runtime::{support::traits::PalletInfo as PalletInfoTrait, PalletInfo};
 
 pub mod coins;
 pub use coins::SeraiCoins;
@@ -51,11 +48,11 @@ pub type Header = SubstrateHeader<serai_runtime::BlockNumber, BlakeTwo256>;
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct SeraiConfig;
 impl SubxtConfig for SeraiConfig {
-  type Hash = <Runtime as Config>::Hash;
+  type Hash = <BlakeTwo256 as subxt::config::Hasher>::Output;
   type Hasher = BlakeTwo256;
 
   type Index = serai_runtime::Nonce;
-  type AccountId = <Runtime as Config>::AccountId;
+  type AccountId = serai_primitives::AccountId;
   // TODO: Bech32m
   type Address = SeraiAddress;
 
