@@ -92,3 +92,5 @@ lazy_static = { git = "https://github.com/rust-lang-nursery/lazy-static.rs", rev
 # subxt *can* pull these off crates.io yet there's no benefit to this
 sp-core-hashing = { git = "https://github.com/serai-dex/substrate" }
 sp-std = { git = "https://github.com/serai-dex/substrate" }
+
+if-watch = { git = "https://github.com/kayabaNerve/if-watch" }
