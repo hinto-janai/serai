@@ -78,11 +78,17 @@ pub enum RpcError {
 }
 
 fn rpc_hex(value: &str) -> Result<Vec<u8>, RpcError> {
-  hex::decode(value).map_err(|_| RpcError::InvalidNode)
+  hex::decode(value).map_err(|e| {
+    dbg!(e);
+    RpcError::InvalidNode
+  })
 }
 
 fn hash_hex(hash: &str) -> Result<[u8; 32], RpcError> {
-  rpc_hex(hash)?.try_into().map_err(|_| RpcError::InvalidNode)
+  rpc_hex(hash)?.try_into().map_err(|e| {
+    dbg!(e);
+    RpcError::InvalidNode
+  })
 }
 
 fn rpc_point(point: &str) -> Result<EdwardsPoint, RpcError> {
@@ -131,23 +137,25 @@ impl<R: RpcConnection> Rpc<R> {
     route: &str,
     params: Option<Params>,
   ) -> Result<Response, RpcError> {
-    serde_json::from_str(
-      std_shims::str::from_utf8(
-        &self
-          .0
-          .post(
-            route,
-            if let Some(params) = params {
-              serde_json::to_string(&params).unwrap().into_bytes()
-            } else {
-              vec![]
-            },
-          )
-          .await?,
+    let res = self
+      .0
+      .post(
+        route,
+        if let Some(params) = params {
+          serde_json::to_string(&params).unwrap().into_bytes()
+        } else {
+          vec![]
+        },
       )
-      .map_err(|_| RpcError::InvalidNode)?,
-    )
-    .map_err(|_| RpcError::InvalidNode)
+      .await?;
+    let raw = std_shims::str::from_utf8(&res).map_err(|e| {
+      dbg!(e);
+      RpcError::InvalidNode
+    })?;
+    serde_json::from_str(raw).map_err(|e| {
+      dbg!((raw, e));
+      RpcError::InvalidNode
+    })
   }
 
   /// Perform a JSON-RPC call with the specified method with the provided parameters
@@ -256,6 +264,7 @@ impl<R: RpcConnection> Rpc<R> {
         // This does run a few keccak256 hashes, which is pointless if the node is trusted
         // In exchange, this provides resilience against invalid/malicious nodes
         if tx.hash() != hashes[i] {
+          dbg!("hash !=");
           Err(RpcError::InvalidNode)?;
         }
 
@@ -282,7 +291,10 @@ impl<R: RpcConnection> Rpc<R> {
 
     let header: BlockHeaderByHeightResponse =
       self.json_rpc_call("get_block_header_by_height", Some(json!({ "height": number }))).await?;
-    rpc_hex(&header.block_header.hash)?.try_into().map_err(|_| RpcError::InvalidNode)
+    rpc_hex(&header.block_header.hash)?.try_into().map_err(|e| {
+      dbg!(e);
+      RpcError::InvalidNode
+    })
   }
 
   /// Get a block from the node by its hash.
@@ -296,9 +308,12 @@ impl<R: RpcConnection> Rpc<R> {
     let res: BlockResponse =
       self.json_rpc_call("get_block", Some(json!({ "hash": hex::encode(hash) }))).await?;
 
-    let block =
-      Block::read::<&[u8]>(&mut rpc_hex(&res.blob)?.as_ref()).map_err(|_| RpcError::InvalidNode)?;
+    let block = Block::read::<&[u8]>(&mut rpc_hex(&res.blob)?.as_ref()).map_err(|e| {
+      dbg!(e);
+      RpcError::InvalidNode
+    })?;
     if block.hash() != hash {
+      dbg!("block hash !=");
       Err(RpcError::InvalidNode)?;
     }
     Ok(block)
@@ -313,10 +328,14 @@ impl<R: RpcConnection> Rpc<R> {
             if usize::try_from(*actual).unwrap() == number {
               Ok(block)
             } else {
+              dbg!("distinct miner tx");
               Err(RpcError::InvalidNode)
             }
           }
-          _ => Err(RpcError::InvalidNode),
+          _ => {
+            dbg!("non-miner miner_tx");
+            Err(RpcError::InvalidNode)
+          }
         }
       }
       e => e,
@@ -496,7 +515,10 @@ impl<R: RpcConnection> Rpc<R> {
 
       read_object(&mut indexes)
     })()
-    .map_err(|_| RpcError::InvalidNode)
+    .map_err(|e| {
+      dbg!(e);
+      RpcError::InvalidNode
+    })
   }
 
   /// Get the output distribution, from the specified height to the specified height (both
@@ -572,7 +594,12 @@ impl<R: RpcConnection> Rpc<R> {
         &outs
           .outs
           .iter()
-          .map(|out| rpc_hex(&out.txid)?.try_into().map_err(|_| RpcError::InvalidNode))
+          .map(|out| {
+            rpc_hex(&out.txid)?.try_into().map_err(|e| {
+              dbg!(e);
+              RpcError::InvalidNode
+            })
+          })
           .collect::<Result<Vec<_>, _>>()?,
       )
       .await?;
@@ -590,9 +617,15 @@ impl<R: RpcConnection> Rpc<R> {
         // Only a recent hard fork checked output keys were valid points
         let Some(key) = CompressedEdwardsY(
           hex::decode(&out.key)
-            .map_err(|_| RpcError::InvalidNode)?
+            .map_err(|e| {
+              dbg!(e);
+              RpcError::InvalidNode
+            })?
             .try_into()
-            .map_err(|_| RpcError::InvalidNode)?,
+            .map_err(|e| {
+              dbg!(e);
+              RpcError::InvalidNode
+            })?,
         )
         .decompress() else {
           return Ok(None);
@@ -736,7 +769,10 @@ impl<R: RpcConnection> Rpc<R> {
 
     let mut blocks = Vec::with_capacity(block_strs.len());
     for block in block_strs {
-      blocks.push(rpc_hex(&block)?.try_into().map_err(|_| RpcError::InvalidNode)?);
+      blocks.push(rpc_hex(&block)?.try_into().map_err(|e| {
+        dbg!(e);
+        RpcError::InvalidNode
+      })?);
     }
     Ok(blocks)
   }
